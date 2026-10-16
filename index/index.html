@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Кто знает Дашу лучше всех? 👑</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: #2d2d3a;
+  }
+
+  .container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 28px;
+    padding: 36px 32px;
+    max-width: 640px;
+    width: 100%;
+    box-shadow: 0 25px 70px rgba(80, 50, 120, 0.35);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -30%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(240, 147, 251, 0.15), transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  h1 {
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #7a6a90;
+    margin-bottom: 28px;
+    font-size: 1em;
+    font-style: italic;
+  }
+
+  /* Стартовый экран */
+  .start-screen {
+    text-align: center;
+    animation: fadeIn 0.6s ease;
+  }
+
+  .start-emoji {
+    font-size: 4.5em;
+    margin-bottom: 15px;
+    display: inline-block;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .start-text {
+    color: #6a5a7a;
+    margin-bottom: 25px;
+    font-size: 1.05em;
+    line-height: 1.6;
+  }
+
+  .player-label {
+    font-size: 0.9em;
+    color: #8a7a9a;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+    font-weight: 600;
+  }
+
+  .player-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .player-btn {
+    padding: 18px 28px;
+    border-radius: 18px;
+    border: 2px solid rgba(118, 75, 162, 0.2);
+    background: rgba(255, 255, 255, 0.8);
+    font-family: inherit;
+    font-size: 1.05em;
+    font-weight: 600;
+    color: #5a4a7a;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 110px;
+  }
+
+  .player-btn:hover {
+    transform: translateY(-3px);
+    border-color: #764ba2;
+    box-shadow: 0 10px 25px rgba(118, 75, 162, 0.25);
+  }
+
+  .player-btn.selected {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 10px 25px rgba(118, 75, 162, 0.4);
+    transform: translateY(-3px);
+  }
+
+  .player-btn .emoji {
+    font-size: 1.4em;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  /* Прогресс */
+  .progress-wrap {
+    width: 100%;
+    height: 8px;
+    background: rgba(118, 75, 162, 0.12);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+    width: 0%;
+    transition: width 0.5s ease;
+    border-radius: 10px;
+  }
+
+  .progress-text {
+    text-align: center;
+    font-size: 0.85em;
+    color: #8a7a9a;
+    margin-bottom: 22px;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+
+  /* Вопрос */
+  .question {
+    font-size: 1.25em;
+    color: #3a2a4a;
+    margin-bottom: 22px;
+    line-height: 1.45;
+    font-weight: 600;
+    min-height: 60px;
+  }
+
+  .text-input {
+    width: 100%;
+    padding: 18px 20px;
+    border: 2px solid rgba(118, 75, 162, 0.2);
+    border-radius: 16px;
+    font-size: 1.05em;
+    font-family: inherit;
+    color: #3a2a4a;
+    background: rgba(255, 255, 255, 0.8);
+    resize: vertical;
+    min-height: 90px;
+    outline: none;
+    transition: all 0.3s ease;
+    line-height: 1.5;
+  }
+
+  .text-input:focus {
+    border-color: #764ba2;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(118, 75, 162, 0.12);
+  }
+
+  .hint {
+    font-size: 0.8em;
+    color: #a89ab8;
+    margin-top: 8px;
+    font-style: italic;
+    text-align: right;
+  }
+
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 26px;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 15px 28px;
+    border-radius: 14px;
+    border: none;
+    font-family: inherit;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    flex: 1;
+    box-shadow: 0 8px 22px rgba(118, 75, 162, 0.35);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(118, 75, 162, 0.45);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .btn-secondary {
+    background: rgba(118, 75, 162, 0.12);
+    color: #5a4a7a;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(118, 75, 162, 0.22);
+  }
+
+  /* Анимации */
+  .fade-in { animation: fadeIn 0.5s ease; }
+  .fade-out { animation: fadeOut 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-15px); }
+  }
+
+  /* Результат */
+  .result-screen {
+    text-align: center;
+    animation: fadeIn 0.7s ease;
+  }
+
+  .result-emoji {
+    font-size: 4.5em;
+    margin-bottom: 10px;
+    animation: bounceIn 0.8s ease;
+  }
+
+  @keyframes bounceIn {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .result-player {
+    color: #8a7a9a;
+    font-size: 1em;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+
+  .result-percent {
+    font-size: 4em;
+    font-weight: 800;
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 10px 0;
+  }
+
+  .result-message {
+    font-size: 1.3em;
+    color: #5a4a7a;
+    margin-bottom: 25px;
+    font-weight: 600;
+  }
+
+  .result-extra {
+    font-size: 2em;
+    margin-bottom: 20px;
+    letter-spacing: 5px;
+  }
+
+  .review-title {
+    font-size: 1.1em;
+    color: #5a4a7a;
+    margin: 30px 0 15px;
+    text-align: left;
+    font-weight: 700;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(118, 75, 162, 0.15);
+  }
+
+  .review-item {
+    text-align: left;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 14px;
+    padding: 15px 18px;
+    margin-bottom: 10px;
+    font-size: 0.92em;
+    line-height: 1.5;
+    border-left: 5px solid #ccc;
+  }
+
+  .review-item.correct { border-left-color: #4caf50; background: rgba(76, 175, 80, 0.08); }
+  .review-item.wrong { border-left-color: #ff6b6b; background: rgba(255, 107, 107, 0.08); }
+
+  .review-q {
+    color: #3a2a4a;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .review-answer {
+    color: #7a6a8a;
+    font-size: 0.92em;
+  }
+
+  .review-correct {
+    color: #2e7d32;
+    font-size: 0.92em;
+    margin-top: 4px;
+    font-weight: 600;
+  }
+
+  .btn-share {
+    margin-top: 25px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    padding: 16px 32px;
+    border-radius: 16px;
+    border: none;
+    font-family: inherit;
+    font-size: 1em;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(118, 75, 162, 0.35);
+    transition: all 0.3s ease;
+  }
+
+  .btn-share:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(118, 75, 162, 0.45);
+  }
+
+  .btn-restart {
+    margin-top: 20px;
+    background: transparent;
+    color: #8a7a9a;
+    border: none;
+    font-family: inherit;
+    font-size: 0.9em;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 8px;
+  }
+
+  .btn-restart:hover { color: #5a4a7a; }
+
+  /* Конфетти / салют */
+  .confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    z-index: 1000;
+    pointer-events: none;
+    animation: fall linear forwards;
+  }
+
+  @keyframes fall {
+    to {
+      transform: translateY(100vh) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  /* Дождик */
+  .raindrop {
+    position: fixed;
+    width: 2px;
+    height: 20px;
+    top: -30px;
+    background: linear-gradient(to bottom, transparent, #7ab8e8);
+    z-index: 1000;
+    pointer-events: none;
+    animation: rainFall linear forwards;
+    border-radius: 50%;
+    opacity: 0.7;
+  }
+
+  @keyframes rainFall {
+    to { transform: translateY(100vh); opacity: 0; }
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 26px 20px; border-radius: 22px; }
+    h1 { font-size: 1.5em; }
+    .question { font-size: 1.08em; }
+    .result-percent { font-size: 3em; }
+    .result-message { font-size: 1.1em; }
+    .player-btn { padding: 14px 20px; font-size: 0.95em; min-width: 95px; }
+    .start-emoji { font-size: 3.5em; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+
+<script>
+// ================= ДАННЫЕ =================
+// Каждый вопрос: { q, keywords: [...] }
+// Ответ засчитывается, если в нём есть ХОТЯ БЫ ОДНО ключевое слово (в любой форме)
+
+const QUESTIONS = [
+  {
+    q: '🎂 Когда у Даши день рождения? (число и месяц)',
+    keywords: ['17', 'ноябр', '17.11', '17 ноября']
+  },
+  {
+    q: '🍽️ Какое любимое блюдо у Даши?',
+    keywords: ['краб', 'мясо', 'француз', 'картош', 'картошк']
+  },
+  {
+    q: '🎓 В каком ВУЗе и на какой специальности учится Даша?',
+    keywords: ['ранхигс', 'президентск', 'академ', 'эконом', 'вэд', 'внешнеэконом', 'миров']
+  },
+  {
+    q: '📺 Какой любимый сериал у Даши?',
+    keywords: ['кухн', 'элеон', 'гранд', 'сват']
+  },
+  {
+    q: '😨 Чего боится Даша?',
+    keywords: ['насеком', 'паук', 'высот', 'скор', 'боится']
+  },
+  {
+    q: '👯 Как зовут подруг Даши в Беларуси и Москве? (перечисли как можно больше)',
+    keywords: ['ян', 'вик', 'лер', 'ангелин', 'ксюш', 'наст']
+  },
+  {
+    q: '🍟 Какая любимая вредность у Даши?',
+    keywords: ['чипс', 'сухар']
+  },
+  {
+    q: '😇 Какой у Даши характер?',
+    keywords: ['прекрасн', 'ангел', 'бож', 'хорош', 'замечат', 'супер', 'добр', 'мил']
+  },
+  {
+    q: '🩰 Кем Даша мечтала стать в детстве (до 6 класса)?',
+    keywords: ['балерин', 'балет', 'танц', 'танцовщ']
+  },
+  {
+    q: '👩‍🏫 Как звали классных руководителей Даши в школе? (имя и отчество)',
+    keywords: ['светлан', 'сергеевн', 'ирин', 'станиславовн']
+  }
+];
+
+const PLAYERS = [
+  { id: 'mama', label: 'Мама', emoji: '👩' },
+  { id: 'papa', label: 'Папа', emoji: '👨' },
+  { id: 'brat', label: 'Брат', emoji: '🧑' }
+];
+
+// ================= СОСТОЯНИЕ =================
+let currentPlayer = null;
+let currentIndex = 0;
+let answers = [];
+const app = document.getElementById('app');
+
+// ================= СТАРТОВЫЙ ЭКРАН =================
+function renderStart() {
+  currentPlayer = null;
+  currentIndex = 0;
+  answers = new Array(QUESTIONS.length).fill('');
+
+  app.innerHTML = `
+    <div class="start-screen">
+      <h1>Кто знает Дашу лучше всех? 👑</h1>
+      <p class="subtitle">Семейная викторина · 10 вопросов</p>
+      
+      <div class="start-emoji">🎀✨💕</div>
+      
+      <p class="start-text">
+        Привет! Сейчас мы проверим, насколько хорошо ты знаешь Дашу.<br>
+        Отвечай честно, без подсказок 😉
+      </p>
+
+      <div class="player-label">Выбери, кто ты:</div>
+      <div class="player-buttons">
+        ${PLAYERS.map(p => `
+          <button class="player-btn" data-player="${p.id}">
+            <span class="emoji">${p.emoji}</span>
+            ${p.label}
+          </button>
+        `).join('')}
+      </div>
+
+      <button class="btn btn-primary" id="startBtn" disabled style="width: 100%;">
+        Начать викторину 🚀
+      </button>
+    </div>
+  `;
+
+  document.querySelectorAll('.player-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.player-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      currentPlayer = PLAYERS.find(p => p.id === btn.dataset.player);
+      document.getElementById('startBtn').disabled = false;
+    });
+  });
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    if (!currentPlayer) return;
+    currentIndex = 0;
+    renderQuestion();
+  });
+}
+
+// ================= ВОПРОС =================
+function renderQuestion() {
+  const q = QUESTIONS[currentIndex];
+  const progress = (currentIndex / QUESTIONS.length) * 100;
+
+  app.innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-bar" style="width: ${progress}%"></div>
+    </div>
+    <div class="progress-text">Вопрос ${currentIndex + 1} из ${QUESTIONS.length}</div>
+
+    <div id="questionBlock" class="fade-in">
+      <div class="question">${q.q}</div>
+      <textarea class="text-input" id="textAnswer" placeholder="Напиши свой ответ...">${escapeHtml(answers[currentIndex] || '')}</textarea>
+      <div class="hint">✍️ Пиши своими словами — важно, чтобы совпало хоть одно слово</div>
+      
+      <div class="nav-buttons">
+        ${currentIndex > 0 ? '<button class="btn btn-secondary" id="backBtn">← Назад</button>' : ''}
+        <button class="btn btn-primary" id="nextBtn" ${!(answers[currentIndex] || '').trim() ? 'disabled' : ''}>
+          ${currentIndex === QUESTIONS.length - 1 ? 'Результат ✨' : 'Далее →'}
+        </button>
+      </div>
+    </div>
+  `;
+
+  const ta = document.getElementById('textAnswer');
+  const nextBtn = document.getElementById('nextBtn');
+  const backBtn = document.getElementById('backBtn');
+
+  ta.focus();
+  ta.addEventListener('input', () => {
+    answers[currentIndex] = ta.value;
+    nextBtn.disabled = !ta.value.trim();
+  });
+
+  // Ctrl+Enter / Enter — переход дальше
+  ta.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      if (!nextBtn.disabled) nextBtn.click();
+    }
+  });
+
+  nextBtn.addEventListener('click', goNext);
+  if (backBtn) backBtn.addEventListener('click', goBack);
+}
+
+function goNext() {
+  const block = document.getElementById('questionBlock');
+  block.classList.remove('fade-in');
+  block.classList.add('fade-out');
+  setTimeout(() => {
+    currentIndex++;
+    if (currentIndex >= QUESTIONS.length) {
+      renderResult();
+    } else {
+      renderQuestion();
+    }
+  }, 280);
+}
+
+function goBack() {
+  const block = document.getElementById('questionBlock');
+  block.classList.remove('fade-in');
+  block.classList.add('fade-out');
+  setTimeout(() => {
+    currentIndex--;
+    renderQuestion();
+  }, 280);
+}
+
+// ================= ПРОВЕРКА =================
+function checkAnswer(q, userAnswer) {
+  if (!userAnswer || !userAnswer.trim()) return false;
+  const lower = userAnswer.toLowerCase().replace(/ё/g, 'е');
+  return q.keywords.some(kw => lower.includes(kw.replace(/ё/g, 'е')));
+}
+
+// ================= РЕЗУЛЬТАТ =================
+function renderResult() {
+  let correctCount = 0;
+  const review = [];
+
+  QUESTIONS.forEach((q, i) => {
+    const ok = checkAnswer(q, answers[i]);
+    if (ok) correctCount++;
+    review.push({ q, userAnswer: answers[i], ok });
+  });
+
+  const percent = Math.round((correctCount / QUESTIONS.length) * 100);
+
+  // Реакции по процентам
+  let emoji = '';
+  let message = '';
+  let extra = '';
+  let effect = null; // 'fireworks' | 'rain' | null
+
+  if (percent >= 80) {
+    emoji = '🎉🏆🎊';
+    message = 'Вот это да! Ты знаешь Дашу на все 100!';
+    extra = '👏🎆👏🎆👏';
+    effect = 'fireworks';
+  } else if (percent >= 60) {
+    emoji = '😊💕';
+    message = 'Мило! Ты неплохо знаешь Дашу';
+    extra = '😊✨😊';
+  } else if (percent >= 40) {
+    emoji = '🤨';
+    message = 'Хм... подозрительно. Ты точно её знаешь?';
+    extra = '🤨🤔🤨';
+  } else {
+    emoji = '🌧️😢';
+    message = 'Ой-ой... кажется, надо познакомиться поближе';
+    extra = '😢💧😢💧😢';
+    effect = 'rain';
+  }
+
+  let reviewHTML = '<div class="review-title">Разбор ответов 📋</div>';
+  review.forEach((r, i) => {
+    reviewHTML += `
+      <div class="review-item ${r.ok ? 'correct' : 'wrong'}">
+        <div class="review-q">${i + 1}. ${escapeHtml(r.q.q)}</div>
+        <div class="review-answer">Твой ответ: ${escapeHtml(r.userAnswer) || '(пусто)'} ${r.ok ? '✅' : '❌'}</div>
+        ${!r.ok ? `<div class="review-correct">Правильные варианты: ${r.q.keywords.join(', ')}</div>` : ''}
+      </div>
+    `;
+  });
+
+  app.innerHTML = `
+    <div class="result-screen">
+      <div class="result-player">${currentPlayer.emoji} ${currentPlayer.label}</div>
+      <div class="result-emoji">${emoji}</div>
+      <div class="result-percent">${percent}%</div>
+      <div class="result-message">${message}</div>
+      <div class="result-extra">${extra}</div>
+      
+      <button class="btn-share" id="shareBtn">Поделиться результатом 💌</button>
+      
+      ${reviewHTML}
+      
+      <button class="btn-restart" id="restartBtn">← Пройти заново / сменить игрока</button>
+    </div>
+  `;
+
+  document.getElementById('shareBtn').addEventListener('click', () => {
+    const text = `${currentPlayer.label}: я знаю Дашу на ${percent}%! ${emoji}`;
+    if (navigator.share) {
+      navigator.share({ text }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('shareBtn');
+        const old = btn.textContent;
+        btn.textContent = 'Скопировано! ✅ Отправь Даше';
+        setTimeout(() => btn.textContent = old, 2500);
+      }).catch(() => {
+        prompt('Скопируй результат и отправь Даше:', text);
+      });
+    }
+  });
+
+  document.getElementById('restartBtn').addEventListener('click', renderStart);
+
+  // Запуск эффектов
+  if (effect === 'fireworks') {
+    launchFireworks();
+    playApplause();
+  } else if (effect === 'rain') {
+    launchRain();
+  }
+}
+
+// ================= ЭФФЕКТ: САЛЮТ =================
+function launchFireworks() {
+  const colors = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#ffd93d', '#6bcf7f', '#ffb347'];
+  for (let i = 0; i < 150; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDuration = (2 + Math.random() * 2.5) + 's';
+      c.style.width = c.style.height = (6 + Math.random() * 10) + 'px';
+      c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 5000);
+    }, i * 20);
+  }
+}
+
+// ================= ЭФФЕКТ: ДОЖДИК =================
+function launchRain() {
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const d = document.createElement('div');
+      d.className = 'raindrop';
+      d.style.left = Math.random() * 100 + 'vw';
+      d.style.animationDuration = (0.6 + Math.random() * 0.6) + 's';
+      d.style.height = (15 + Math.random() * 20) + 'px';
+      document.body.appendChild(d);
+      setTimeout(() => d.remove(), 1500);
+    }, i * 40);
+  }
+}
+
+// ================= АПЛОДИСМЕНТЫ (синтез через Web Audio) =================
+function playApplause() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const duration = 2.5;
+    const sampleRate = ctx.sampleRate;
+    const buffer = ctx.createBuffer(1, sampleRate * duration, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      // Белый шум с затуханием — похоже на аплодисменты
+      const t = i / data.length;
+      const envelope = Math.min(1, t * 4) * Math.max(0, 1 - t);
+      data[i] = (Math.random() * 2 - 1) * envelope * 0.15;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 2000;
+    filter.Q.value = 0.7;
+    const gain = ctx.createGain();
+    gain.gain.value = 0.5;
+    src.connect(filter).connect(gain).connect(ctx.destination);
+    src.start();
+  } catch (e) {
+    // тихо игнорируем, если браузер блокирует звук
+  }
+}
+
+// ================= УТИЛИТЫ =================
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// ================= СТАРТ =================
+renderStart();
+</script>
+</body>
+</html>
