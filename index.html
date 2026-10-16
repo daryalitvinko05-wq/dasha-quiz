@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Теперь ты — это я</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: linear-gradient(135deg, #f5e6e8 0%, #e8d5d8 50%, #d4c5cc 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    color: #4a3f42;
+  }
+
+  .container {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 700px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(120, 90, 100, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    position: relative;
+    overflow: hidden;
+  }
+
+  h1 {
+    font-size: 2.2em;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #6b4a56;
+    font-weight: 400;
+    letter-spacing: 1px;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #9b7a86;
+    font-style: italic;
+    margin-bottom: 30px;
+    font-size: 1em;
+  }
+
+  .progress-wrap {
+    width: 100%;
+    height: 6px;
+    background: rgba(180, 150, 160, 0.2);
+    border-radius: 10px;
+    margin-bottom: 25px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #c89ca8, #9b7a86);
+    width: 0%;
+    transition: width 0.5s ease;
+    border-radius: 10px;
+  }
+
+  .progress-text {
+    text-align: center;
+    font-size: 0.85em;
+    color: #9b7a86;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+
+  .section-label {
+    display: inline-block;
+    font-size: 0.75em;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #b08a97;
+    background: rgba(200, 156, 168, 0.15);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 15px;
+  }
+
+  .question {
+    font-size: 1.3em;
+    color: #4a3f42;
+    margin-bottom: 25px;
+    line-height: 1.4;
+    min-height: 60px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option {
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 2px solid rgba(200, 156, 168, 0.3);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1em;
+    color: #5a4a50;
+    font-family: inherit;
+    text-align: left;
+    line-height: 1.4;
+  }
+
+  .option:hover {
+    background: rgba(245, 230, 232, 0.9);
+    border-color: #c89ca8;
+    transform: translateX(4px);
+  }
+
+  .option.selected {
+    background: linear-gradient(135deg, #e8cfd4, #d4aab5);
+    border-color: #9b7a86;
+    color: #fff;
+    transform: translateX(6px);
+  }
+
+  .text-input {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid rgba(200, 156, 168, 0.3);
+    border-radius: 14px;
+    font-size: 1em;
+    font-family: inherit;
+    color: #5a4a50;
+    background: rgba(255, 255, 255, 0.7);
+    resize: vertical;
+    min-height: 100px;
+    outline: none;
+    transition: border-color 0.3s ease;
+  }
+
+  .text-input:focus {
+    border-color: #9b7a86;
+    background: #fff;
+  }
+
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    gap: 12px;
+  }
+
+  .btn {
+    padding: 14px 28px;
+    border-radius: 14px;
+    border: none;
+    font-family: inherit;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #b08a97, #8a6675);
+    color: #fff;
+    flex: 1;
+    box-shadow: 0 6px 20px rgba(155, 122, 134, 0.35);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(155, 122, 134, 0.45);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-secondary {
+    background: rgba(200, 156, 168, 0.2);
+    color: #8a6675;
+  }
+
+  .btn-secondary:hover {
+    background: rgba(200, 156, 168, 0.35);
+  }
+
+  /* Плавные переходы между вопросами */
+  .fade-in {
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-out {
+    animation: fadeOut 0.3s ease;
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-15px); }
+  }
+
+  /* Финальный экран */
+  .result-screen {
+    text-align: center;
+    animation: fadeIn 0.7s ease;
+  }
+
+  .result-emoji {
+    font-size: 4em;
+    margin-bottom: 20px;
+    animation: bounceIn 0.8s ease;
+  }
+
+  @keyframes bounceIn {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .result-percent {
+    font-size: 3.5em;
+    color: #8a6675;
+    font-weight: 400;
+    margin: 15px 0;
+  }
+
+  .result-message {
+    font-size: 1.4em;
+    color: #6b4a56;
+    margin-bottom: 30px;
+    font-style: italic;
+  }
+
+  .review-title {
+    font-size: 1.1em;
+    color: #8a6675;
+    margin: 30px 0 15px;
+    letter-spacing: 1px;
+    text-align: left;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(200, 156, 168, 0.3);
+  }
+
+  .review-item {
+    text-align: left;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    font-size: 0.92em;
+    line-height: 1.5;
+    border-left: 4px solid #c89ca8;
+  }
+
+  .review-item.correct {
+    border-left-color: #a8c8a8;
+  }
+
+  .review-item.wrong {
+    border-left-color: #d4a8a8;
+  }
+
+  .review-q {
+    color: #5a4a50;
+    font-weight: bold;
+    margin-bottom: 6px;
+  }
+
+  .review-answer {
+    color: #7a6a70;
+    font-size: 0.9em;
+  }
+
+  .review-correct {
+    color: #6a8a6a;
+    font-size: 0.9em;
+    margin-top: 4px;
+  }
+
+  .btn-share {
+    margin-top: 25px;
+    background: linear-gradient(135deg, #b08a97, #8a6675);
+    color: #fff;
+    padding: 14px 32px;
+    border-radius: 14px;
+    border: none;
+    font-family: inherit;
+    font-size: 1em;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(155, 122, 134, 0.35);
+    transition: all 0.3s ease;
+  }
+
+  .btn-share:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(155, 122, 134, 0.45);
+  }
+
+  /* Конфетти */
+  .confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    top: -10px;
+    z-index: 1000;
+    pointer-events: none;
+    animation: fall linear forwards;
+  }
+
+  @keyframes fall {
+    to {
+      transform: translateY(100vh) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .container { padding: 25px 20px; }
+    h1 { font-size: 1.7em; }
+    .question { font-size: 1.1em; }
+    .result-percent { font-size: 2.8em; }
+    .result-message { font-size: 1.15em; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container" id="app">
+  <!-- Экраны будут рендериться через JS -->
+</div>
+
+<script>
+// ============ ДАННЫЕ ОПРОСА ============
+// type: 'single' — один правильный ответ (radio)
+//       'multi'  — несколько правильных (checkbox)
+//       'text'   — свободный ввод
+//       'gift'   — всегда засчитывается (подарок)
+// keywords — массив ключевых слов (в нижнем регистре) для оценки свободного ввода
+
+const SECTIONS = [
+  "Про меня и мою жизнь",
+  "Мои вкусы",
+  "Как бы я поступила в ситуации...",
+  "Чтобы не расслаблялись"
+];
+
+const QUESTIONS = [
+  // ===== РАЗДЕЛ 1: ПРО МЕНЯ И МОЮ ЖИЗНЬ =====
+  {
+    section: 0,
+    type: 'single',
+    q: 'Какой рукой я пишу / делаю бытовые дела?',
+    options: ['Правой', 'Левой', 'Я амбидекстор'],
+    correct: [1, 2] // Б и В
+  },
+  {
+    section: 0,
+    type: 'single',
+    q: 'Какая я личность?',
+    options: ['Романтичная', 'Реалистичная', 'Пофигистка'],
+    correct: [0]
+  },
+  {
+    section: 0,
+    type: 'text',
+    q: 'Ваши предположения: как я вижу свою жизнь в ближайшие 5 лет?',
+    keywords: ['работ', 'беларус', 'минск', 'осипович', 'жить', 'живу', 'жизн']
+  },
+  {
+    section: 0,
+    type: 'single',
+    q: 'Мой самый большой страх — потерять...',
+    options: ['Слух', 'Зрение', 'Память'],
+    correct: [2] // В
+  },
+  {
+    section: 0,
+    type: 'text',
+    q: 'Моя мечта, которой никогда не суждено сбыться (из-за которой в детстве я выпала из реальности на 2 недели)',
+    keywords: ['балерин', 'балет']
+  },
+
+  // ===== РАЗДЕЛ 2: МОИ ВКУСЫ =====
+  {
+    section: 1,
+    type: 'single',
+    q: 'Мой самый нелюбимый продукт питания, от запаха которого меня воротит',
+    options: ['Цветная капуста', 'Грибы', 'Яйца', 'Жареный лук'],
+    correct: [2] // В
+  },
+  {
+    section: 1,
+    type: 'multi',
+    q: 'Какой отдых в свободное время я предпочту?',
+    options: ['Сходить на творческий мастер-класс', 'Пойти в клуб', 'Прогуляться с вами', 'Остаться дома и смотреть фильмы/сериалы'],
+    correct: [0, 2] // А и В
+  },
+  {
+    section: 1,
+    type: 'multi',
+    q: 'Мои любимые снэки',
+    options: ['Орешки', 'Чипсы', 'Хлебцы', 'Семочки'],
+    correct: [1, 3] // Б и Г
+  },
+  {
+    section: 1,
+    type: 'multi',
+    q: 'Какой жанр фильма я предпочту посмотреть?',
+    options: ['Комедия', 'Боевик', 'Детектив', 'Хоррор'],
+    correct: [0, 3] // А и Г
+  },
+  {
+    section: 1,
+    type: 'single',
+    q: 'Как я отношусь к острой еде?',
+    options: ['Люблю только сладкое', 'По настроению могу съесть', 'Люблю больше острое, чем сладкое'],
+    correct: [2] // В
+  },
+
+  // ===== РАЗДЕЛ 3: КАК БЫ Я ПОСТУПИЛА В СИТУАЦИИ =====
+  {
+    section: 2,
+    type: 'single',
+    q: 'Я опаздываю на прогулку с подругами. Что я сделаю?',
+    options: ['Позвоню и предупрежу', 'Прибегу с вкусненьким и с извинениями', 'Напишу "уже выхожу" и буду ещё дома'],
+    correct: [2] // В
+  },
+  {
+    section: 2,
+    type: 'multi',
+    q: 'Мы гуляем вечером по Осиповичам, уже совсем темно. Я вижу машину, которая замедляется около нас / незнакомых парней, которые приближаются к нам. Мои действия:',
+    options: ['Ускорю шаг', 'Начну вести себя кончено', 'Прижмусь к кому-нибудь из вас и начну паниковать'],
+    correct: [0, 2] // А и В
+  },
+  {
+    section: 2,
+    type: 'text',
+    q: 'Чтобы я никогда не сделала в плане активного отдыха?',
+    keywords: ['парашют', 'аттракцион', 'адреналин', 'прыж', 'экстрим', 'высот', 'ничего']
+  },
+  {
+    section: 2,
+    type: 'multi',
+    q: 'Как я себя веду в окружении незнакомых людей?',
+    options: ['Очень общительная, весёлая', 'Подозрительная', 'Молчаливая', 'Держусь рядом со знакомыми мне людьми'],
+    correct: [2, 3] // В и Г
+  },
+  {
+    section: 2,
+    type: 'multi',
+    q: 'Как я принимаю решения?',
+    options: ['Спонтанно, импульсивно', 'Анализирую и взвешиваю', 'Доверяюсь судьбе'],
+    correct: [1, 2] // Б и В
+  },
+
+  // ===== РАЗДЕЛ 4: ЧТОБЫ НЕ РАССЛАБЛЯЛИСЬ =====
+  {
+    section: 3,
+    type: 'text',
+    q: 'Какой фильм или сериал описывает нашу дружбу?',
+    keywords: ['отчаянные домохозяйки', 'домохозяйки', 'секс в большом городе', 'большом городе']
+  },
+  {
+    section: 3,
+    type: 'gift',
+    q: 'Если бы я была героиней, то какого фильма и что за героиня?'
+  },
+  {
+    section: 3,
+    type: 'gift',
+    q: 'Если есть что-то, что ты мне так и не рассказала, но очень хочешь — самое время ✨'
+  },
+  {
+    section: 3,
+    type: 'gift',
+    q: 'Что я делаю/делала особенного, что ты понимаешь, насколько ценна наша дружба для меня?'
+  },
+  {
+    section: 3,
+    type: 'multi',
+    q: 'Мой главный бьюти-грех',
+    options: ['Редко могу заснуть с макияжем', 'Забываю про уход', 'Постоянно трогаю лицо', 'Никаких грехов'],
+    correct: [0, 2] // А и В
+  }
+];
+
+// ============ СОСТОЯНИЕ ============
+let currentIndex = 0;
+let answers = new Array(QUESTIONS.length).fill(null);
+const app = document.getElementById('app');
+
+// ============ РЕНДЕР ============
+function render() {
+  if (currentIndex >= QUESTIONS.length) {
+    renderResult();
+    return;
+  }
+
+  const q = QUESTIONS[currentIndex];
+  const sectionName = SECTIONS[q.section];
+  const progress = ((currentIndex) / QUESTIONS.length) * 100;
+
+  let optionsHTML = '';
+
+  if (q.type === 'text' || q.type === 'gift') {
+    const val = answers[currentIndex] || '';
+    optionsHTML = `<textarea class="text-input" id="textAnswer" placeholder="Напиши свой ответ...">${escapeHtml(val)}</textarea>`;
+  } else {
+    q.options.forEach((opt, i) => {
+      const selected = answers[currentIndex] && answers[currentIndex].includes(i);
+      optionsHTML += `<button class="option ${selected ? 'selected' : ''}" data-idx="${i}">${escapeHtml(opt)}</button>`;
+    });
+  }
+
+  app.innerHTML = `
+    <h1>Теперь ты — это я</h1>
+    <p class="subtitle">Опрос от Даши для самых близких 💕</p>
+    
+    <div class="progress-wrap">
+      <div class="progress-bar" style="width: ${progress}%"></div>
+    </div>
+    <div class="progress-text">Вопрос ${currentIndex + 1} из ${QUESTIONS.length}</div>
+
+    <div id="questionBlock" class="fade-in">
+      <span class="section-label">${escapeHtml(sectionName)}</span>
+      <div class="question">${escapeHtml(q.q)}</div>
+      <div class="options">${optionsHTML}</div>
+      <div class="nav-buttons">
+        ${currentIndex > 0 ? '<button class="btn btn-secondary" id="backBtn">Назад</button>' : ''}
+        <button class="btn btn-primary" id="nextBtn" disabled>
+          ${currentIndex === QUESTIONS.length - 1 ? 'Узнать результат ✨' : 'Далее'}
+        </button>
+      </div>
+    </div>
+  `;
+
+  attachHandlers(q);
+  updateNextButton();
+}
+
+function attachHandlers(q) {
+  const nextBtn = document.getElementById('nextBtn');
+  const backBtn = document.getElementById('backBtn');
+
+  if (q.type === 'text' || q.type === 'gift') {
+    const ta = document.getElementById('textAnswer');
+    ta.addEventListener('input', () => {
+      answers[currentIndex] = ta.value;
+      updateNextButton();
+    });
+    ta.focus();
+  } else {
+    document.querySelectorAll('.option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx);
+        if (q.type === 'single') {
+          answers[currentIndex] = [idx];
+        } else {
+          let cur = answers[currentIndex] || [];
+          if (cur.includes(idx)) cur = cur.filter(x => x !== idx);
+          else cur = [...cur, idx];
+          answers[currentIndex] = cur.sort((a, b) => a - b);
+        }
+        // Перерисовать только кнопки
+        document.querySelectorAll('.option').forEach(b => {
+          const i = parseInt(b.dataset.idx);
+          b.classList.toggle('selected', answers[currentIndex].includes(i));
+        });
+        updateNextButton();
+      });
+    });
+  }
+
+  nextBtn.addEventListener('click', () => {
+    const block = document.getElementById('questionBlock');
+    block.classList.remove('fade-in');
+    block.classList.add('fade-out');
+    setTimeout(() => {
+      currentIndex++;
+      render();
+    }, 280);
+  });
+
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      const block = document.getElementById('questionBlock');
+      block.classList.remove('fade-in');
+      block.classList.add('fade-out');
+      setTimeout(() => {
+        currentIndex--;
+        render();
+      }, 280);
+    });
+  }
+}
+
+function updateNextButton() {
+  const btn = document.getElementById('nextBtn');
+  if (!btn) return;
+  const a = answers[currentIndex];
+  const q = QUESTIONS[currentIndex];
+  
+  let filled = false;
+  if (q.type === 'text' || q.type === 'gift') {
+    filled = a && a.toString().trim().length > 0;
+  } else {
+    filled = a && a.length > 0;
+  }
+  btn.disabled = !filled;
+}
+
+// ============ ПРОВЕРКА ОТВЕТОВ ============
+function checkAnswer(q, userAnswer) {
+  // gift — всегда правильно
+  if (q.type === 'gift') return true;
+
+  // text — проверка по ключевым словам
+  if (q.type === 'text') {
+    if (!userAnswer || !userAnswer.trim()) return false;
+    const lower = userAnswer.toLowerCase();
+    return q.keywords.some(kw => lower.includes(kw));
+  }
+
+  // single / multi — сравнение массивов
+  const correct = q.correct.slice().sort((a, b) => a - b);
+  const user = (userAnswer || []).slice().sort((a, b) => a - b);
+  if (correct.length !== user.length) return false;
+  return correct.every((v, i) => v === user[i]);
+}
+
+// ============ РЕЗУЛЬТАТ ============
+function renderResult() {
+  let correctCount = 0;
+  const review = [];
+
+  QUESTIONS.forEach((q, i) => {
+    const ok = checkAnswer(q, answers[i]);
+    if (ok) correctCount++;
+    review.push({ q, userAnswer: answers[i], ok });
+  });
+
+  const percent = Math.round((correctCount / QUESTIONS.length) * 100);
+
+  let emoji = '';
+  let message = '';
+  let confettiNeeded = false;
+
+  if (percent >= 80) {
+    emoji = '🎉💖🎊';
+    message = 'Ты моя любимая подружка!';
+    confettiNeeded = true;
+  } else if (percent >= 60) {
+    emoji = '👏✨👏';
+    message = 'Я тебя поняла';
+  } else if (percent >= 40) {
+    emoji = '😔💔';
+    message = 'Кик вику';
+  } else {
+    emoji = '😭😭😭';
+    message = 'На одну подругу у меня меньше';
+  }
+
+  let reviewHTML = '<div class="review-title">Разбор ответов</div>';
+  review.forEach((r, i) => {
+    const q = r.q;
+    let userStr = '';
+    let correctStr = '';
+
+    if (q.type === 'gift') {
+      userStr = answers[i] || '(пусто)';
+      correctStr = '✨ Этот вопрос — подарок для Даши';
+    } else if (q.type === 'text') {
+      userStr = answers[i] || '(пусто)';
+      correctStr = 'Ключевые слова: ' + q.keywords.join(', ');
+    } else {
+      const uIdx = answers[i] || [];
+      userStr = uIdx.length ? uIdx.map(x => q.options[x]).join(', ') : '(не выбрано)';
+      correctStr = q.correct.map(x => q.options[x]).join(' / ');
+    }
+
+    reviewHTML += `
+      <div class="review-item ${r.ok ? 'correct' : 'wrong'}">
+        <div class="review-q">${i + 1}. ${escapeHtml(q.q)}</div>
+        <div class="review-answer">Твой ответ: ${escapeHtml(userStr)} ${r.ok ? '✅' : '❌'}</div>
+        ${!r.ok ? `<div class="review-correct">Правильно: ${escapeHtml(correctStr)}</div>` : ''}
+      </div>
+    `;
+  });
+
+  app.innerHTML = `
+    <div class="result-screen">
+      <div class="result-emoji">${emoji}</div>
+      <div class="result-percent">${percent}%</div>
+      <div class="result-message">${message}</div>
+      <button class="btn-share" id="shareBtn">Поделиться результатом 💌</button>
+      ${reviewHTML}
+    </div>
+  `;
+
+  document.getElementById('shareBtn').addEventListener('click', () => {
+    const text = `Я знаю Дашу на ${percent}%! ${emoji} "${message}"`;
+    if (navigator.share) {
+      navigator.share({ text }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('shareBtn');
+        btn.textContent = 'Скопировано! ✅';
+        setTimeout(() => btn.textContent = 'Поделиться результатом 💌', 2000);
+      });
+    }
+  });
+
+  if (confettiNeeded) launchConfetti();
+}
+
+// ============ КОНФЕТТИ ============
+function launchConfetti() {
+  const colors = ['#c89ca8', '#d4aab5', '#e8cfd4', '#b08a97', '#f5e6e8', '#a8c8a8'];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animationDuration = (2 + Math.random() * 2) + 's';
+      c.style.width = c.style.height = (6 + Math.random() * 8) + 'px';
+      c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 4500);
+    }, i * 30);
+  }
+}
+
+// ============ УТИЛИТЫ ============
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// ============ СТАРТ ============
+render();
+</script>
+</body>
+</html>
